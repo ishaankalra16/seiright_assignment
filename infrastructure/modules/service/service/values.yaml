@@ -1,0 +1,22 @@
+name: titan
+spec:
+  namespace: default
+  replicas: 2
+  minReplicas: 1
+  maxReplicas: 3
+  automountServiceAccountToken: false
+  containers:
+    image: punkerside/noroot:v0.0.7
+    imagePullPolicy: Always
+    cpu: 100m
+    memory: 200Mi
+    containerPort: 3000
+    servicePort: 80
+    serviceProtocol: TCP
+    probe: /user/health
+    initialDelaySeconds: 5
+    periodSeconds: 3
+    failureThreshold: 3
+    averageUtilizationCpu: 85
+    averageUtilizationMemory: 85
+    env: []

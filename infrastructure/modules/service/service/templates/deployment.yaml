@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.name }}"
+  namespace: {{ .Values.spec.namespace }}
+  labels:
+    app: "{{ .Values.name }}"
+spec:
+  replicas: {{ .Values.spec.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ .Values.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ .Values.name }}"
+    spec:
+      securityContext:
+        runAsUser: {{ .Values.spec.containers.runAsUser }}
+        runAsGroup: {{ .Values.spec.containers.runAsGroup }}
+        seccompProfile:
+          type: RuntimeDefault
+      automountServiceAccountToken: {{ .Values.spec.automountServiceAccountToken }}
+      containers:
+      - name: "{{ .Values.name }}"
+        image: {{ .Values.spec.containers.image }}
+        env:
+          {{- toYaml .Values.spec.containers.env | nindent 12 }}
+        imagePullPolicy: {{ .Values.spec.containers.imagePullPolicy }}
+        ports:
+        - containerPort: {{ .Values.spec.containers.containerPort }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.spec.containers.probe }}
+            port: {{ .Values.spec.containers.containerPort }}
+          initialDelaySeconds: {{ .Values.spec.containers.initialDelaySeconds }}
+          periodSeconds: {{ .Values.spec.containers.periodSeconds }}
+          failureThreshold: {{ .Values.spec.containers.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.spec.containers.probe }}
+            port: {{ .Values.spec.containers.containerPort }}
+          initialDelaySeconds: {{ .Values.spec.containers.initialDelaySeconds }}
+          periodSeconds: {{ .Values.spec.containers.periodSeconds }}
+        resources:
+          requests:
+            cpu: {{ .Values.spec.containers.cpu }}
+            memory: {{ .Values.spec.containers.memory }}

@@ -1,0 +1,131 @@
+{
+  "locals": {
+    "name": "dev",
+    "network": {
+      "cidr": "10.59.0.0/16",
+      "region": "ap-south-1",
+      "azs": ["ap-south-1a","ap-south-1b"]
+    },
+    "kubernetes": {
+      "default_instance": "m6i.metal",
+      "addons": {
+        "vpc-cni": {
+          "name": "vpc-cni",
+          "addon_version": "v1.19.0-eksbuild.1"
+        },
+        "aws-ebs-csi-driver": {
+          "name": "aws-ebs-csi-driver",
+          "addon_version": "v1.37.0-eksbuild.1"
+        },
+        "kube-proxy": {
+          "name": "kube-proxy",
+          "addon_version": "v1.31.2-eksbuild.3"
+        },
+        "core-dns": {
+          "name": "coredns",
+          "addon_version": "v1.11.3-eksbuild.2"
+        }
+      },
+      "node_groups": {
+      },
+      "self_managed_node_groups": {
+        "default_node_group": {
+          "ami_type": "AL2_x86_64",
+          "min_size": 1,
+          "max_size": 3,
+          "desired_size": 1,
+          "instance_size": ["m6i.metal"],
+          "capacity_type": "SPOT",
+          "disk_size": "50",
+          "use_custom_launch_template": false,
+          "iam_role_additional_policies": {
+            "ebscsi": "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+          }
+        }
+      }
+    },
+    "backend_service": {
+      "name": "nodejs-backend",
+      "values": {
+        "spec": {
+          "containers": {
+            "image": "ishaanfacets/node-express-sequelize-postgresql:1",
+            "cpu": "100m",
+            "memory": "1000Mi",
+            "containerPort": 8080,
+            "servicePort": 8080,
+            "probe": "/",
+            "initialDelaySeconds": 10,
+            "periodSeconds": 5,
+            "failureThreshold": 3,
+            "env": [
+              {
+                "name": "POSTGRES_DB_HOST",
+                "value": "${module.postgres.attributes.host}"
+              },
+              {
+                "name": "POSTGRES_DB_USER",
+                "value": "${module.postgres.attributes.username}"
+              },
+              {
+                "name": "POSTGRES_DB_PASSWORD",
+                "value": "${module.postgres.attributes.password}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "frontend_service": {
+      "name": "react-frontend",
+      "values": {
+        "spec": {
+          "containers": {
+            "image": "ishaanfacets/redux-toolkit-example-crud-hooks:1",
+            "cpu": "100m",
+            "memory": "1000Mi",
+            "containerPort": 8080,
+            "servicePort": 8080,
+            "probe": "/",
+            "initialDelaySeconds": 10,
+            "periodSeconds": 5,
+            "failureThreshold": 3,
+            "env": [
+              {
+                "name": "API_BASE_URL",
+                "value": "https://sei-backend.infra3.facetsdev.click/api"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "postgres": {
+      "name": "main"
+    },
+    "rabbitmq": {
+      "name": "main"
+    },
+    "nginx-ingress": {
+      "name": "main",
+      "hosted_zone_domain": "infra3.facetsdev.click",
+      "rules": {
+        "frontend": {
+          "path": "/",
+          "service": "${module.frontend_service.attributes.name}",
+          "port": "${module.frontend_service.attributes.port}",
+          "domain_prefix": "sei-frontend"
+        },
+        "backend": {
+          "path": "/api",
+          "service": "${module.backend_service.attributes.name}",
+          "port": "${module.backend_service.attributes.port}",
+          "domain_prefix": "sei-backend"
+        }
+      }
+    },
+    "cluster-autoscaler": {},
+    "aws-lb-controller": {},
+    "cert-manager": {}
+  }
+}
