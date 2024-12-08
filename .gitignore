@@ -18,3 +18,4 @@ crash.log
 .DS_Store
 Thumbs.db
 .idea/
+**/node_modules/
