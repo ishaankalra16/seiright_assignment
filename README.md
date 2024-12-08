@@ -25,8 +25,8 @@ For subsequent steps, we can go deeper on the above (like security practices, lo
   - `main.tf`: Root terraform project file calling modules from the moduls directory
   - `providers.tf`: Containing the provider configration
   - `versions.tf`: Containing the provider versions.
-  - `modules`: Contains the modules that are being used in the root level terraform project files.
-    - `utility_modules`: Contains a few utility module being used as function inside several modules.
+  - `modules/`: Contains the modules that are being used in the root level terraform project files.
+    - `utility_modules/`: Contains a few utility module being used as function inside several modules.
 - `service/`: Contains the source code of the applications
   - `node-express-sequelize-postgresql`: Source code for the Node JS backend working with postgres as the database. Code taken from the [repository](https://github.com/bezkoder/node-express-sequelize-postgresql)
   - `redux-toolkit-example-crud-hooks`: Source code for React JS frontend. Code taken from the [repository](https://github.com/bezkoder/redux-toolkit-example-crud-hooks/tree/master)
@@ -47,7 +47,7 @@ This repository automates the deployment of a multi-tenant infrastructure on **A
     - Add-ons: `ebs-csi-driver`, `vpc-cni`, `kube-proxy`, `coredns`
 
 3. **Application Deployment:**
-  - Provisions resources for the product: databases (Postgres, RabbitMQ) and services.
+  - Provisions resources for the product: databases (Postgres, RabbitMQ) and services. Configurtion parameters for the service as being passed as environment variables.
   - Exposing services using `nginx-ingress`.
   - Automates SSL certificates via `cert-manager`.
 
